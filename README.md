@@ -167,8 +167,6 @@ The fictional sample contains 12 events, 3 failed logins, 3 successful logins, 3
 ## What I learned from this project
 
 - How Flask routes connect an HTML form to Python code.
-- How regular expressions can extract security-relevant patterns from plain text.
-- How to count and summarize events with Python collections.
 - How to build a clear dashboard that communicates defensive findings.
 - Why file validation and limiting input size are useful safety controls.
 
