@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>LogLens | Defensive Log Analysis</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand"><span class="brand-mark">⌁</span><span>Log<span class="accent">Lens</span></span></div>
+        <span class="mode-badge">LOCAL ANALYSIS</span>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div>
+                <p class="eyebrow">DEFENSIVE LOG MONITORING</p>
+                <h1>See the story inside your logs.</h1>
+                <p class="subtitle">Upload a local log file to surface useful event counts and basic security observations.</p>
+            </div>
+            <div class="hero-icon">◈</div>
+        </section>
+
+        <section class="upload-panel">
+            <form method="post" enctype="multipart/form-data">
+                <label class="drop-zone" for="log_file">
+                    <span class="upload-icon">↑</span>
+                    <span class="drop-title">Choose a log file</span>
+                    <span class="drop-help" id="file-name">.log or .txt files only · max 2 MB</span>
+                    <input id="log_file" name="log_file" type="file" accept=".log,.txt" required>
+                </label>
+                <button type="submit">Analyze log <span>→</span></button>
+            </form>
+            {% if error %}
+                <p class="message error-message">{{ error }}</p>
+            {% endif %}
+            {% if file_name %}
+                <p class="message success-message">Analyzed <strong>{{ file_name }}</strong> locally. The file is not stored.</p>
+            {% endif %}
+        </section>
+
+        {% if analysis %}
+        <section class="results">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">ANALYSIS OVERVIEW</p>
+                    <h2>What LogLens found</h2>
+                </div>
+                <span class="status-dot">● Analysis complete</span>
+            </div>
+
+            <div class="cards">
+                <div class="card highlight"><span class="card-label">Total Events</span><strong>{{ analysis.total_events }}</strong><span class="card-icon">▦</span></div>
+                <div class="card danger"><span class="card-label">Failed Logins</span><strong>{{ analysis.failed_logins }}</strong><span class="card-icon">↘</span></div>
+                <div class="card success"><span class="card-label">Successful Logins</span><strong>{{ analysis.successful_logins }}</strong><span class="card-icon">↗</span></div>
+                <div class="card danger"><span class="card-label">Errors</span><strong>{{ analysis.error_events }}</strong><span class="card-icon">!</span></div>
+                <div class="card warning"><span class="card-label">Warnings</span><strong>{{ analysis.warning_events }}</strong><span class="card-icon">△</span></div>
+                <div class="card info"><span class="card-label">Unique IPs</span><strong>{{ analysis.unique_ips }}</strong><span class="card-icon">⌖</span></div>
+            </div>
+
+            <div class="grid-two">
+                <section class="panel">
+                    <div class="panel-title"><h3>Top source IPs</h3><span>EVENT COUNT</span></div>
+                    {% if analysis.top_ips %}
+                        {% set max_count = analysis.top_ips[0].count %}
+                        {% for item in analysis.top_ips %}
+                        <div class="ip-row">
+                            <div class="ip-info"><code>{{ item.ip }}</code><span>{{ item.count }} event{% if item.count != 1 %}s{% endif %}</span></div>
+                            <div class="bar"><i style="width: {{ (item.count / max_count * 100)|round|int }}%"></i></div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="empty">No IPv4 addresses detected.</p>
+                    {% endif %}
+                </section>
+                <section class="panel">
+                    <div class="panel-title"><h3>Security summary</h3><span>OBSERVATIONS</span></div>
+                    <ul class="observations">
+                        {% for observation in analysis.observations %}
+                        <li><span class="observation-dot"></span>{{ observation }}</li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            </div>
+
+            <section class="panel events-panel">
+                <div class="panel-title"><h3>Important detected events</h3><span>FAILED LOGIN SAMPLE</span></div>
+                {% if analysis.important_events %}
+                    {% for event in analysis.important_events %}
+                    <div class="event-row"><span class="event-tag">FAILED LOGIN</span><span>{{ event.text }}</span></div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty">No failed login events were detected in this file.</p>
+                {% endif %}
+            </section>
+
+            <section class="panel findings-panel">
+                <div class="panel-title"><h3>Recommended action</h3><span>INFORMATIONAL GUIDANCE</span></div>
+                <div class="findings">
+                    {% for finding in analysis.security_findings %}
+                    <article class="finding">
+                        <div class="finding-header">
+                            <h4>{{ finding.detection }}</h4>
+                            <span class="severity severity-{{ finding.severity|lower }}">{{ finding.severity }}</span>
+                        </div>
+                        <div class="finding-details">
+                            {% if finding.source_ip %}<span><b>Source IP:</b> <code>{{ finding.source_ip }}</code></span>{% endif %}
+                            {% if finding.event_count %}<span><b>Event Count:</b> {{ finding.event_count }}</span>{% endif %}
+                        </div>
+                        <p class="action"><b>Recommended Action:</b> {{ finding.action }}</p>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+        </section>
+        {% else %}
+        <section class="empty-state">
+            <div class="empty-graphic">⌁</div>
+            <h2>Ready when you are</h2>
+            <p>Upload the included <code>sample.log</code> file to explore a safe example analysis.</p>
+        </section>
+        {% endif %}
+    </main>
+    <footer>LogLens · A local educational cybersecurity project · Your log data stays in this app</footer>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

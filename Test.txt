@@ -1,0 +1,5 @@
+2026-09-18 10:01:22 INFO User login successful from 192.168.1.10
+2026-09-18 10:02:11 WARNING Failed login attempt from 192.168.1.55
+2026-09-18 10:02:15 WARNING Failed login attempt from 192.168.1.55
+2026-09-18 10:02:18 ERROR Authentication failure from 192.168.1.55
+2026-09-18 10:03:02 INFO User login successful from 192.168.1.10
